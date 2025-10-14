@@ -3,16 +3,57 @@ dotenv.config();
 import express from "express";
 
 const app = express();
-const port = process.env.PORT || 3000;
+import path from "path";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import cors from "cors";
+
+// ⬇️ Import your DB package (use the exact package.json "name")
+import { initModels, sequelize } from "typescriptdb";
+// Import onStartUp functions
+import {
+	verifyCheckDirectoryExists,
+	onStartUpCreateEnvUsers,
+} from "./modules/onStartUp";
 
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
 
+// Verify and create necessary directories first
+verifyCheckDirectoryExists();
 
+// CORS configuration (must be BEFORE routes)
+app.use(
+	cors({
+		credentials: true,
+		exposedHeaders: ["Content-Disposition"], // <-- this line is key
+	})
+);
+
+// Register routes
 app.use("/users", usersRouter);
 app.use("/", indexRouter);
 
+// Initialize database and startup functions
+async function initializeApp() {
+	try {
+		// Initialize and sync DB
+		initModels();
+		await sequelize.sync(); // or { alter: true } while iterating
+		console.log("✅ Database connected & synced");
 
-app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
-});
+		// Run startup functions after database is ready
+		await onStartUpCreateEnvUsers();
+
+		console.log("✅ App initialization completed");
+	} catch (err) {
+		console.error("❌ App initialization failed:", err);
+		process.exit(1);
+	}
+}
+
+// Initialize the app when this module is imported
+initializeApp();
+
+// Export the app for server.ts to use
+export default app;

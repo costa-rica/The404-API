@@ -1,10 +1,10 @@
-# TypeScript Express.js API
+# TypeScript Express.js API 02 - Starter
 
-This is a TypeScript Express.js API project. For learning purposes.
+This is a TypeScript Express.js API project. This is my starter project for all Express.js API projects.
 
 ## Set up
 
-1. mkdir TypeScriptExpressJsAPI and `npm init -y`
+1. mkdir TypeScriptExpressJsAPI02starter and `npm init -y`
 2. Install Express and tooling
 
 ```bash
