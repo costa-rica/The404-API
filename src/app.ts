@@ -21,6 +21,11 @@ import usersRouter from "./routes/users";
 
 // Verify and create necessary directories first
 verifyCheckDirectoryExists();
+// Middleware configuration (must be BEFORE routes)
+app.use(express.json()); // Parse JSON request bodies
+app.use(express.urlencoded({ extended: false })); // Parse URL-encoded bodies
+app.use(cookieParser()); // Parse cookies
+app.use(morgan("dev")); // HTTP request logging
 
 // CORS configuration (must be BEFORE routes)
 app.use(
