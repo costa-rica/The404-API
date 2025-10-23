@@ -9,6 +9,7 @@ The404-API is a TypeScript Express.js API that serves as part of The 404 Server 
 ## Development Commands
 
 ### Running the application
+
 ```bash
 npm run dev     # Development mode with hot-reload (watches src/)
 npm run build   # Compile TypeScript to dist/
@@ -22,11 +23,13 @@ The dev server runs on `http://0.0.0.0:3000` by default (configurable via `PORT`
 **CRITICAL**: This project is in transition from `TypeScriptDb` to MongoDB/Mongoose.
 
 ### Current State (Temporary)
+
 - Currently uses `typescriptdb` package (local file dependency: `file:../TypeScriptDb`)
 - Imports `initModels` and `sequelize` from `typescriptdb`
 - Uses Sequelize ORM pattern
 
 ### Target State (Follow DATABASE_CONVERSION_OVERVIEW.md)
+
 The project should migrate to a native Mongoose setup:
 
 ```
@@ -38,6 +41,7 @@ src/models/
 ```
 
 When working with database code:
+
 - Do NOT extend the `typescriptdb` package usage
 - Follow the Mongoose single-connection pattern documented in `docs/DATABASE_CONVERSION_OVERVIEW.md`
 - Use existing `users` and `machines` collections from the original The404Back project
@@ -47,6 +51,7 @@ When working with database code:
 ## Application Structure
 
 ### Entry Point Flow
+
 1. `src/server.ts` - Server startup, error handling, console log override with APP_NAME
 2. `src/app.ts` - Express app configuration, middleware setup, route registration, database initialization
 
@@ -54,6 +59,7 @@ When working with database code:
 
 **Middleware Order (CRITICAL)**:
 Middleware MUST be registered BEFORE routes in `src/app.ts`:
+
 ```typescript
 // 1. JSON/URL-encoded body parsing
 app.use(express.json());
@@ -74,11 +80,13 @@ app.use("/", indexRouter);
 ```
 
 **Initialization Sequence**:
+
 - `app.ts` calls `verifyCheckDirectoryExists()` to create required directories from env vars
 - `initializeApp()` async function initializes DB models, syncs sequelize, then runs `onStartUpCreateEnvUsers()`
 - Server exits with code 1 if initialization fails
 
 ### Directory Structure
+
 ```
 src/
 ├── app.ts                 # Express app config & initialization
@@ -96,6 +104,7 @@ src/
 ## Authentication
 
 Uses JWT tokens with bcrypt password hashing:
+
 - `JWT_SECRET` environment variable required
 - Tokens generated with `jwt.sign({ id: user.id }, process.env.JWT_SECRET)`
 - Passwords hashed with `bcrypt.hash(password, 10)`
@@ -104,6 +113,7 @@ Uses JWT tokens with bcrypt password hashing:
 ## Environment Variables
 
 Required variables:
+
 - `PORT` - Server port (default: 3000)
 - `APP_NAME` - Application name for logging (default: "ExpressAPI02")
 - `JWT_SECRET` - Secret for JWT signing
@@ -113,6 +123,7 @@ Required variables:
 - `ADMIN_EMAIL` - JSON array of admin emails (e.g., `["admin@example.com"]`)
 
 ### Admin User Creation
+
 On startup, `onStartUpCreateEnvUsers()` creates admin users from `ADMIN_EMAIL` env var with default password "test" if they don't exist.
 
 ## API Endpoints
@@ -120,23 +131,30 @@ On startup, `onStartUpCreateEnvUsers()` creates admin users from `ADMIN_EMAIL` e
 See `docs/API_REFERENCE.md` for complete endpoint documentation.
 
 ### Core Routes
+
 - `GET /` - Serves HTML from `src/templates/index.html`
 - `GET /users` - Simple health check
 - `POST /users/register` - Create new user (returns JWT token)
 - `POST /users/login` - Authenticate user (returns JWT token)
 
 ### Request Validation Pattern
+
 Uses `checkBodyReturnMissing(body, requiredKeys)` from `src/modules/common.ts`:
+
 ```typescript
-const { isValid, missingKeys } = checkBodyReturnMissing(req.body, ["email", "password"]);
+const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
+	"email",
+	"password",
+]);
 if (!isValid) {
-  return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
+	return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
 }
 ```
 
 ## Error Handling
 
 Global error handlers in `src/server.ts`:
+
 - `uncaughtException` - Logs error with stack trace, exits process
 - `unhandledRejection` - Logs promise rejection details with stack trace
 - Console methods overridden to prefix all logs with `[APP_NAME]`
@@ -147,3 +165,18 @@ Global error handlers in `src/server.ts`:
 - CORS is configured to allow credentials and expose Content-Disposition header
 - Server binds to `0.0.0.0` for external access (not just localhost)
 - Username is auto-generated from email prefix (before @) during registration
+
+## Implementation Difficulty Index
+
+This index helps Claude determine how challenging a proposed implementation would be within this project’s architecture and conventions. Claude should use this to assign a score from 0 to 10 when assessing new implementation requests.
+
+**Scale:**
+
+0: no need to change anything — functionality already exists  
+1: minor modifications to existing files  
+2: major modifications to existing files  
+3–4: create new files  
+5–6: create new files and folders  
+7–8: change current structure and architecture (renaming, deleting, or repurposing)  
+9: outside the range of convention given the technology, packages, and architecture in use  
+10: impossible to accomplish
