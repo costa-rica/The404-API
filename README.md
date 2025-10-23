@@ -1,11 +1,20 @@
-# TypeScript Express.js API 02 - Starter
+# The 404 Server Manager API
 
 This is a TypeScript Express.js API project. This is my starter project for all Express.js API projects.
 
+## Database
+
+**IMPORTANT**
+See /docs/DATABASE_CONVERSION_OVERVIEW.md
+
+- This project uses MongoDB with Mongoose.
+- This project will remove the TypeScriptDb package and replace its implementation with Mongoose and the new structure provided in DATABASE_CONVERSION_OVERVIEW.md.
+
 ## Set up
 
-1. mkdir TypeScriptExpressJsAPI02starter and `npm init -y`
-2. Install Express and tooling
+1. clone TypeScriptExpressJsAPI02starter
+2. Rename
+3. implement the MongoDB database
 
 ```bash
 npm install express

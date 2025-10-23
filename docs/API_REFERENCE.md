@@ -1,6 +1,6 @@
 # API Reference
 
-This document provides comprehensive documentation for all available API endpoints in the TypeScriptExpressJsAPI02Starter API.
+This document provides comprehensive documentation for all available API endpoints in the The404-API API.
 
 ## Base URL
 
