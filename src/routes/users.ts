@@ -105,4 +105,57 @@ router.post(
 	}
 );
 
+// 🔹 POST /users/reset-password-with-new-password
+router.post(
+	"/reset-password-with-new-password",
+	async (req: Request, res: Response) => {
+		const { token, newPassword } = req.body;
+
+		// Validate required fields
+		const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
+			"token",
+			"newPassword",
+		]);
+
+		if (!isValid) {
+			return res
+				.status(400)
+				.json({ error: `Missing ${missingKeys.join(", ")}` });
+		}
+
+		try {
+			// Verify the JWT token
+			const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+				id: string;
+			};
+
+			// Find the user by ID from the token
+			const user = await User.findById(decoded.id);
+			if (!user) {
+				return res.status(404).json({ error: "User not found." });
+			}
+
+			// Hash the new password
+			const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+			// Update the user's password
+			user.password = hashedPassword;
+			await user.save();
+
+			res.status(200).json({ message: "Password reset successfully" });
+		} catch (error) {
+			// Handle token verification errors
+			if (error instanceof jwt.JsonWebTokenError) {
+				return res.status(401).json({ error: "Invalid or expired token." });
+			}
+			if (error instanceof jwt.TokenExpiredError) {
+				return res.status(401).json({ error: "Reset token has expired." });
+			}
+
+			console.error("Error resetting password:", error);
+			res.status(500).json({ error: "Internal server error" });
+		}
+	}
+);
+
 export default router;
