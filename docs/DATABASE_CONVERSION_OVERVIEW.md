@@ -1,7 +1,7 @@
 # 🧩 Database Setup for The404-API
 
 This project diverges from the default **TypeScriptExpressJsAPI02starter** database setup.  
-While the starter project uses an external package (`TypeScriptDb`) for database access, **The404-API** implements its own **MongoDB** connection using **Mongoose**.  
+While the starter project uses an external package (`TypeScriptDb`) for database access, **The404-API** implements its own **MongoDB** connection using **Mongoose**.
 
 ## Overview
 
@@ -63,10 +63,10 @@ connectDB();
 
 Each model file (for example, `user.ts` or `machine.ts`) should:
 
-1. **Import `mongoose`**  
-2. **Define a schema** using `new mongoose.Schema()`  
-3. **Create a model** using `mongoose.model()`  
-4. **Export the model** for use in routes and controllers  
+1. **Import `mongoose`**
+2. **Define a schema** using `new mongoose.Schema()`
+3. **Create a model** using `mongoose.model()`
+4. **Export the model** for use in routes and controllers
 
 **Example (`machine.ts`):**
 
@@ -102,8 +102,61 @@ export const User = mongoose.model("User", userSchema);
 
 When generating the `CLAUDE.md` file:
 
-- Recognize that **The404-API** does **not** use `TypeScriptDb`.  
-- Follow the **Mongoose single-connection pattern** from `src/models/connection.ts`.  
-- Use the **existing `users` and `machines` collections** from the original `The404Back` project.  
-- Do **not** create other tables (such as pm2 apps or nginx configs) in the initial setup.  
+- Recognize that **The404-API** does **not** use `TypeScriptDb`.
+- Follow the **Mongoose single-connection pattern** from `src/models/connection.ts`.
+- Use the **existing `users` and `machines` collections** from the original `The404Back` project.
+- Do **not** create other tables (such as pm2 apps or nginx configs) in the initial setup.
 - Prepare the schema and connection to be extended later for multi-machine and PM2 data synchronization.
+
+## Reference files from the original The404Back project
+
+### models/connection.js
+
+```js
+const mongoose = require("mongoose");
+const connectionString = process.env.DB_CONNECTION_STRING;
+mongoose.set("strictQuery", true);
+
+mongoose
+	.connect(connectionString, { connectTimeoutMS: 2000 })
+	.then(() => console.log("Successfully connected to the Database 🥳 !"))
+	.catch((errorMessage) => console.error(errorMessage));
+```
+
+### models/user.js
+
+```js
+const mongoose = require("mongoose");
+
+const userSchema = mongoose.Schema({
+	email: String,
+	username: String,
+	password: String,
+	toggleOnOffPermis: { type: Boolean, default: false },
+	createdDate: { type: Date, default: Date.now },
+});
+
+const User = mongoose.model("users", userSchema);
+
+module.exports = User;
+```
+
+### models/machine.js
+
+```js
+const mongoose = require("mongoose");
+
+const machineSchema = mongoose.Schema({
+	machineName: String,
+	urlFor404Api: String,
+	localIpAddress: String,
+	userHomeDir: String,
+	// nginxDir: String,
+	nginxStoragePathOptions: [String],
+	dateLastModified: Date,
+	dateCreated: { type: Date, default: Date.now },
+});
+
+const Machine = mongoose.model("machines", machineSchema);
+module.exports = Machine;
+```

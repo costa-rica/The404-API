@@ -1,6 +1,6 @@
 import fs from "fs";
 import bcrypt from "bcrypt";
-import { User } from "typescriptdb";
+import { User } from "../models/user";
 
 export function verifyCheckDirectoryExists(): void {
 	// Add directory paths to check (and create if they don't exist)
@@ -36,7 +36,7 @@ export async function onStartUpCreateEnvUsers(): Promise<void> {
 
 	for (const email of adminEmails) {
 		try {
-			const existingUser = await User.findOne({ where: { email } });
+			const existingUser = await User.findOne({ email });
 
 			if (!existingUser) {
 				console.log(`🔹 Creating admin user: ${email}`);

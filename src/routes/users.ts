@@ -1,7 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import { checkBodyReturnMissing } from "../modules/common";
-import { User } from "typescriptdb";
+import { User } from "../models/user";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const router = express.Router();
@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
 		return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
 	}
 
-	const existingUser = await User.findOne({ where: { email } });
+	const existingUser = await User.findOne({ email });
 	if (existingUser) {
 		return res.status(400).json({ error: "User already exists" });
 	}
@@ -56,7 +56,7 @@ router.post("/login", async (req, res) => {
 		return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
 	}
 
-	const user = await User.findOne({ where: { email } });
+	const user = await User.findOne({ email });
 	if (!user) {
 		return res.status(400).json({ error: "User not found" });
 	}

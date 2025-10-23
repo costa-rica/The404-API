@@ -8,8 +8,8 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors";
 
-// ⬇️ Import your DB package (use the exact package.json "name")
-import { initModels, sequelize } from "typescriptdb";
+// Import MongoDB connection
+import connectDB from "./models/connection";
 // Import onStartUp functions
 import {
 	verifyCheckDirectoryExists,
@@ -42,10 +42,8 @@ app.use("/", indexRouter);
 // Initialize database and startup functions
 async function initializeApp() {
 	try {
-		// Initialize and sync DB
-		initModels();
-		await sequelize.sync(); // or { alter: true } while iterating
-		console.log("✅ Database connected & synced");
+		// Connect to MongoDB
+		await connectDB();
 
 		// Run startup functions after database is ready
 		await onStartUpCreateEnvUsers();
