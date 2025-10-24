@@ -8,7 +8,7 @@ import { authenticateToken } from "../modules/authentication";
 const router = express.Router();
 
 // 🔹 GET /machines/name: Get machine name and local IP address
-router.get("/name", (req: Request, res: Response) => {
+router.get("/name", authenticateToken, (req: Request, res: Response) => {
 	try {
 		const machineInfo = getMachineInfo();
 		res.json(machineInfo);
@@ -34,7 +34,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // 🔹 POST /machines: Create a new machine
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", authenticateToken, async (req: Request, res: Response) => {
 	try {
 		const { urlFor404Api, nginxStoragePathOptions, userHomeDir } = req.body;
 

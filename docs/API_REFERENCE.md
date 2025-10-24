@@ -347,7 +347,7 @@ curl --location 'http://localhost:3000/users/reset-password-with-new-password' \
 
 Get the current machine's hostname and local IP address using OS-level information.
 
-**Authentication:** Not required
+**Authentication:** Required (JWT token)
 
 **Request:**
 
@@ -438,7 +438,7 @@ curl --location 'http://localhost:3000/machines' \
 
 Register a new machine in the system. Automatically adds the machine name and local IP address from OS.
 
-**Authentication:** Not required
+**Authentication:** Required (JWT token)
 
 **Request Body:**
 
@@ -634,6 +634,7 @@ curl --location 'http://localhost:3000/pm2/apps' \
 ```
 
 **Notes:**
+
 - Port information is read from the `ecosystem.config.js` file specified in `PATH_PM2_ECOSYSTEM` environment variable
 - Empty array is returned if no PM2 apps are running
 
