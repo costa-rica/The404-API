@@ -23,6 +23,7 @@ Authorization: Bearer <your_jwt_token>
 - [Index Routes](#index-routes)
 - [User Routes](#user-routes)
 - [Machine Routes](#machine-routes)
+- [PM2 Routes](#pm2-routes)
 
 ---
 
@@ -563,6 +564,212 @@ curl --location --request DELETE 'http://localhost:3000/machines/507f1f77bcf86cd
 ```json
 {
 	"error": "Failed to delete machine"
+}
+```
+
+---
+
+## PM2 Routes
+
+### GET /pm2/apps
+
+Get all PM2 managed applications running on the server with detailed information including port numbers.
+
+**Authentication:** Required (JWT token)
+
+**Request:**
+
+```http
+GET /pm2/apps HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/pm2/apps' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"managedAppsArray": [
+		{
+			"name": "The404Back",
+			"pm_id": 0,
+			"status": "online",
+			"cpu": 0.5,
+			"memory": 62275584,
+			"uptime": 1761282745752,
+			"restarts": 0,
+			"script": "/Users/nick/Documents/The404Back/server.js",
+			"exec_mode": "fork_mode",
+			"instances": 1,
+			"pid": 31029,
+			"version": "0.0.0",
+			"node_version": "22.19.0",
+			"port": 8000
+		},
+		{
+			"name": "Samurai04Web",
+			"pm_id": 1,
+			"status": "stopped",
+			"cpu": 0,
+			"memory": 0,
+			"uptime": 0,
+			"restarts": 5,
+			"script": "/Users/nick/.nvm/versions/node/v22.19.0/bin/npm",
+			"exec_mode": "fork_mode",
+			"instances": 1,
+			"pid": null,
+			"version": "0.40.3",
+			"node_version": "22.19.0",
+			"port": 8002
+		}
+	]
+}
+```
+
+**Notes:**
+- Port information is read from the `ecosystem.config.js` file specified in `PATH_PM2_ECOSYSTEM` environment variable
+- Empty array is returned if no PM2 apps are running
+
+**Error Responses:**
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**503 Service Unavailable - PM2 Not Available:**
+
+```json
+{
+	"error": "PM2 is not installed or not available",
+	"managedAppsArray": []
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Failed to retrieve PM2 applications",
+	"managedAppsArray": []
+}
+```
+
+---
+
+### POST /pm2/toggle-app-status/:name
+
+Toggle the status of a PM2 application. If the app is online, it will be stopped. If stopped, it will be started. If in an error state, it will be restarted.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+- `name` (string, required) - Name of the PM2 application to toggle
+
+**Request:**
+
+```http
+POST /pm2/toggle-app-status/Samurai04Web HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location --request POST 'http://localhost:3000/pm2/toggle-app-status/Samurai04Web' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response - Stopped App (200 OK):**
+
+```json
+{
+	"message": "App stopped successfully",
+	"app": {
+		"name": "Samurai04Web",
+		"status": "stopped",
+		"action": "stop"
+	}
+}
+```
+
+**Success Response - Started App (200 OK):**
+
+```json
+{
+	"message": "App started successfully",
+	"app": {
+		"name": "Samurai04Web",
+		"status": "online",
+		"action": "start"
+	}
+}
+```
+
+**Success Response - Restarted App (200 OK):**
+
+```json
+{
+	"message": "App restarted successfully",
+	"app": {
+		"name": "Samurai04Web",
+		"status": "online",
+		"action": "restart"
+	}
+}
+```
+
+**Error Responses:**
+
+**400 Bad Request - Missing App Name:**
+
+```json
+{
+	"error": "App name is required"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**404 Not Found - App Not Found:**
+
+```json
+{
+	"error": "App \"NonExistentApp\" not found"
+}
+```
+
+**503 Service Unavailable - PM2 Not Available:**
+
+```json
+{
+	"error": "PM2 is not installed or not available"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Failed to toggle app status"
 }
 ```
 

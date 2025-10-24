@@ -19,6 +19,7 @@ import {
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
 import machinesRouter from "./routes/machines";
+import pm2Router from "./routes/pm2";
 
 // Verify and create necessary directories first
 verifyCheckDirectoryExists();
@@ -39,6 +40,7 @@ app.use(
 // Register routes
 app.use("/users", usersRouter);
 app.use("/machines", machinesRouter);
+app.use("/pm2", pm2Router);
 app.use("/", indexRouter);
 
 // Initialize database and startup functions
