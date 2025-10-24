@@ -2,6 +2,8 @@ import express from "express";
 import type { Request, Response } from "express";
 import { authenticateToken } from "../modules/authentication";
 import { getPM2Apps, toggleAppStatus } from "../modules/pm2";
+import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -74,10 +76,7 @@ router.post(
 			}
 
 			// PM2 command errors
-			if (
-				error.message?.includes("command not found") ||
-				error.code === 127
-			) {
+			if (error.message?.includes("command not found") || error.code === 127) {
 				return res.status(503).json({
 					error: "PM2 is not installed or not available",
 				});
@@ -89,5 +88,36 @@ router.post(
 		}
 	}
 );
+
+// 🔹 GET /pm2/logs/:appName: Get PM2 app logs
+router.get("/logs/:appName", authenticateToken, async (req, res) => {
+	try {
+		const { appName } = req.params;
+		const type = req.query.type === "err" ? "error" : "out";
+		const lines = parseInt(req.query.lines as string) || 500;
+
+		// const logPath = path.join(
+		// 	process.env.PATH_PM2_HOME,
+		// 	`.pm2/logs/${appName}-${type}.log`
+		// );
+		const pm2Home =
+			process.env.PATH_PM2_HOME || process.env.HOME || "/home/ubuntu";
+		const logPath = path.join(pm2Home, `logs/${appName}-${type}.log`);
+
+		if (!fs.existsSync(logPath)) {
+			return res.status(404).json({ error: "Log file not found" });
+		}
+
+		// Read only the tail (for performance)
+		const content = fs.readFileSync(logPath, "utf8");
+		const linesArray = content.trim().split("\n");
+		const lastLines = linesArray.slice(-lines);
+
+		return res.json({ appName, type, lines: lastLines });
+	} catch (err) {
+		console.error("Error reading log:", err);
+		return res.status(500).json({ error: "Failed to read log file" });
+	}
+});
 
 export default router;

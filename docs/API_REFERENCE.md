@@ -774,4 +774,54 @@ curl --location --request POST 'http://localhost:3000/pm2/toggle-app-status/Samu
 }
 ```
 
----
+### GET /pm2/logs/:appName
+
+Retrieve the latest lines from the specified PM2 application's log or error file.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+- `appName` (string, required) — Name of the PM2 application
+
+**Query Parameters:**
+
+- `type` (string, optional) — Log type:
+  - `out` → output log _(default)_
+  - `err` → error log
+- `lines` (number, optional) — Number of lines to return from the log file _(default: 500)_
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/pm2/logs/Samurai04Web?type=out&lines=700' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"appName": "Samurai04Web",
+	"type": "out",
+	"lines": [
+		"Server started...",
+		"Listening on port 8000",
+		"Connected to MongoDB",
+		"..."
+	]
+}
+```
+
+**Error Responses:**
+
+**404 Not Found — Log File Not Found**
+
+```json
+{ "error": "Log file not found" }
+```
+
+**500 Internal Server Error**
+
+```json
+{ "error": "Failed to read log file" }
+```
