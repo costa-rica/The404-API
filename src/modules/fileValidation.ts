@@ -20,7 +20,7 @@ export function verifyTemplateFileExists(templateFileName: string): {
 		};
 	}
 
-	const templateDir = path.join(projectResourcesPath, "createTemplateFile");
+	const templateDir = path.join(projectResourcesPath, "createTemplateFiles");
 
 	// Check if template directory exists
 	if (!fs.existsSync(templateDir)) {
