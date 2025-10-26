@@ -163,6 +163,9 @@ router.get("/scan-nginx-dir", async (req: Request, res: Response) => {
 // 🔹 POST /nginx/create-config-file: Create nginx configuration file
 router.post("/create-config-file", async (req: Request, res: Response) => {
 	try {
+		// Log request body for testing
+		console.log("📥 POST /nginx/create-config-file - Request body:", req.body);
+
 		// Validate required fields
 		const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
 			"templateFileName",
