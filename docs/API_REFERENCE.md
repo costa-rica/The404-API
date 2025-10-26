@@ -1199,6 +1199,84 @@ curl --location 'http://localhost:3000/nginx/create-config-file' \
 
 ---
 
+### DELETE /nginx/:id
+
+Delete a specific nginx configuration file and its database record by ID.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+- `id` (string, required) - MongoDB ObjectId of the NginxFile document to delete
+
+**Request:**
+
+```http
+DELETE /nginx/68fe4bc1307d3f3731af7c17 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location --request DELETE 'http://localhost:3000/nginx/68fe4bc1307d3f3731af7c17' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"message": "Nginx configuration deleted successfully",
+	"serverName": "api.example.com",
+	"filePath": "/etc/nginx/sites-available/api.example.com"
+}
+```
+
+**Notes:**
+
+- Deletes both the physical nginx config file AND the database record
+- If the physical file doesn't exist, a warning is logged but deletion continues
+- The database record is always deleted even if file deletion fails
+- Returns the server name and file path of the deleted configuration
+
+**Error Responses:**
+
+**400 Bad Request - Invalid ID:**
+
+```json
+{
+	"error": "Invalid configuration ID"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**404 Not Found - Configuration Not Found:**
+
+```json
+{
+	"error": "Configuration not found"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Failed to delete nginx configuration"
+}
+```
+
+---
+
 ### DELETE /nginx/clear
 
 Clear all nginx configuration file records from the database. This does not delete the actual nginx config files from the filesystem.

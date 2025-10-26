@@ -353,4 +353,48 @@ router.delete("/clear", async (req: Request, res: Response) => {
 	}
 });
 
+// 🔹 DELETE /nginx/:id: Delete nginx config file and database record
+router.delete("/:id", async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+
+		// Validate ObjectId
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).json({ error: "Invalid configuration ID" });
+		}
+
+		// Find the configuration document
+		const config = await NginxFile.findById(id);
+		if (!config) {
+			return res.status(404).json({ error: "Configuration not found" });
+		}
+
+		// Construct file path
+		const filePath = path.join(config.storeDirectory, config.serverName);
+
+		// Delete physical file (continue even if file doesn't exist)
+		try {
+			await fs.promises.unlink(filePath);
+			console.log(`🗑️  Deleted nginx config file: ${filePath}`);
+		} catch (error) {
+			// Log warning but continue - file may already be deleted
+			console.warn(
+				`⚠️  File not found (will still delete DB entry): ${filePath}`
+			);
+		}
+
+		// Delete database document
+		await NginxFile.findByIdAndDelete(id);
+
+		res.json({
+			message: "Nginx configuration deleted successfully",
+			serverName: config.serverName,
+			filePath,
+		});
+	} catch (error) {
+		console.error("Error deleting nginx configuration:", error);
+		res.status(500).json({ error: "Failed to delete nginx configuration" });
+	}
+});
+
 export default router;
