@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 /**
- * Verifies that a template file exists in the project resources directory
+ * Verifies that a template file exists in the bundled templates directory
  * @param templateFileName - Name of the template file (should end with .txt)
  * @returns Object with exists boolean and error message if applicable
  */
@@ -11,16 +11,10 @@ export function verifyTemplateFileExists(templateFileName: string): {
 	error?: string;
 	fullPath?: string;
 } {
-	const projectResourcesPath = process.env.PATH_PROJECT_RESOURCES;
-
-	if (!projectResourcesPath) {
-		return {
-			exists: false,
-			error: "PATH_PROJECT_RESOURCES environment variable is not set",
-		};
-	}
-
-	const templateDir = path.join(projectResourcesPath, "createTemplateFiles");
+	// Templates are bundled with the application
+	// In development: src/templates/nginxConfigFiles
+	// In production: dist/templates/nginxConfigFiles
+	const templateDir = path.join(__dirname, "../templates/nginxConfigFiles");
 
 	// Check if template directory exists
 	if (!fs.existsSync(templateDir)) {
