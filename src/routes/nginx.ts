@@ -4,7 +4,7 @@ import { authenticateToken } from "../modules/authentication";
 import { NginxFile } from "../models/nginxFile";
 import { Machine } from "../models/machine";
 import { checkBodyReturnMissing } from "../modules/common";
-import { verifyTemplateFileExists } from "../utils/fileValidation";
+import { verifyTemplateFileExists } from "../modules/fileValidation";
 import { parseNginxConfig } from "../modules/parseNginxConfig";
 import { getMachineInfo } from "../modules/machines";
 import { createNginxConfigFromTemplate } from "../modules/nginx";
