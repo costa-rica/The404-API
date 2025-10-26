@@ -162,10 +162,12 @@ router.get("/scan-nginx-dir", async (req: Request, res: Response) => {
 
 // 🔹 POST /nginx/create-config-file: Create nginx configuration file
 router.post("/create-config-file", async (req: Request, res: Response) => {
+	// Log request body for testing
+	console.log("📥 POST /nginx/create-config-file - Request body:");
+	console.log(JSON.stringify(req.body, null, 2));
+	console.log("Body type:", typeof req.body);
+	console.log("Body keys:", Object.keys(req.body || {}));
 	try {
-		// Log request body for testing
-		console.log("📥 POST /nginx/create-config-file - Request body:", req.body);
-
 		// Validate required fields
 		const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
 			"templateFileName",
@@ -208,7 +210,9 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 		const actualTemplateFileName = templateFileMap[templateFileName];
 		if (!actualTemplateFileName) {
 			return res.status(400).json({
-				error: `Invalid templateFileName. Must be one of: ${Object.keys(templateFileMap).join(", ")}`,
+				error: `Invalid templateFileName. Must be one of: ${Object.keys(
+					templateFileMap
+				).join(", ")}`,
 			});
 		}
 
@@ -239,11 +243,9 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 		// Verify machine exists in database
 		const machine = await Machine.findById(appHostServerMachineId);
 		if (!machine) {
-			return res
-				.status(400)
-				.json({
-					error: "Machine with specified appHostServerMachineId not found",
-				});
+			return res.status(400).json({
+				error: "Machine with specified appHostServerMachineId not found",
+			});
 		}
 
 		// Validate portNumber (number, 1-65535)
@@ -257,13 +259,11 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 				.json({ error: "portNumber must be a number between 1 and 65535" });
 		}
 
-		// Validate saveDestination (must be 'sites-available' or 'conf.d')
-		if (saveDestination !== "sites-available" && saveDestination !== "conf.d") {
-			return res
-				.status(400)
-				.json({
-					error: "saveDestination must be either 'sites-available' or 'conf.d'",
-				});
+		// Validate saveDestination (must be a non-empty string path)
+		if (typeof saveDestination !== "string" || saveDestination.trim() === "") {
+			return res.status(400).json({
+				error: "saveDestination must be a non-empty string path",
+			});
 		}
 
 		// Verify template file exists
@@ -313,11 +313,8 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 		// Note: Could be enhanced to detect framework from template or request
 		const framework = "ExpressJs";
 
-		// Determine storeDirectory based on saveDestination
-		const storeDirectory =
-			saveDestination === "sites-available"
-				? "/etc/nginx/sites-available"
-				: "/etc/nginx/conf.d";
+		// Use saveDestination as the storeDirectory
+		const storeDirectory = saveDestination;
 
 		// Create NginxFile database record
 		const nginxFileRecord = await NginxFile.create({

@@ -9,7 +9,7 @@ export interface NginxConfigParams {
 	serverNamesArray: string[];
 	localIpAddress: string;
 	portNumber: number;
-	saveDestination: "sites-available" | "conf.d";
+	saveDestination: string; // Full directory path where config will be saved
 	outputFileName?: string; // Optional custom filename
 }
 
@@ -74,12 +74,8 @@ export async function createNginxConfigFromTemplate(
 			portNumber.toString()
 		);
 
-		// 3. Determine output directory
-		const nginxBaseDir = "/etc/nginx";
-		const targetDir =
-			saveDestination === "sites-available"
-				? path.join(nginxBaseDir, "sites-available")
-				: path.join(nginxBaseDir, "conf.d");
+		// 3. Use saveDestination as the target directory
+		const targetDir = saveDestination;
 
 		// 4. Determine output filename (use primary server name if not provided)
 		const fileName = outputFileName || primaryServerName;

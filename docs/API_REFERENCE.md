@@ -1069,7 +1069,7 @@ curl --location 'http://localhost:3000/nginx/create-config-file' \
 
 - `templateFileName` must be either `"expressJs"` or `"nextJsPython"`
 - Template files must exist in the templates directory
-- `saveDestination` must be either `'sites-available'` or `'conf.d'`
+- `saveDestination` must be a valid directory path (e.g., `"/etc/nginx/sites-available"`, `"/etc/nginx/conf.d"`, or any custom path)
 - The machine specified by `appHostServerMachineId` must exist and have a `localIpAddress` field
 - Creates both the physical nginx config file and a database record
 
@@ -1143,7 +1143,7 @@ curl --location 'http://localhost:3000/nginx/create-config-file' \
 
 ```json
 {
-	"error": "saveDestination must be either 'sites-available' or 'conf.d'"
+	"error": "saveDestination must be a non-empty string path"
 }
 ```
 
