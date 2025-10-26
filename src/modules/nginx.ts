@@ -53,13 +53,14 @@ export async function createNginxConfigFromTemplate(
 
 		// 2. Replace placeholders
 		const primaryServerName = serverNamesArray[0];
+		const allServerNames = serverNamesArray.join(" ");
 
 		let processedContent = templateContent;
 
-		// Replace server name placeholder
+		// Replace server name placeholder with all server names
 		processedContent = processedContent.replace(
 			/<ReplaceMe: server name>/g,
-			primaryServerName
+			allServerNames
 		);
 
 		// Replace local IP placeholder
