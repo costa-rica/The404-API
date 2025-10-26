@@ -186,7 +186,7 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 			saveDestination,
 		} = req.body;
 
-		// Validate templateFileName (string)
+		// Validate and map templateFileName to actual file
 		if (
 			typeof templateFileName !== "string" ||
 			templateFileName.trim() === ""
@@ -194,6 +194,19 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 			return res
 				.status(400)
 				.json({ error: "templateFileName must be a non-empty string" });
+		}
+
+		// Map template type to actual filename
+		const templateFileMap: Record<string, string> = {
+			expressJs: "expressJsSitesAvailable.txt",
+			nextJsPython: "nextJsPythonSitesAvailable.txt",
+		};
+
+		const actualTemplateFileName = templateFileMap[templateFileName];
+		if (!actualTemplateFileName) {
+			return res.status(400).json({
+				error: `Invalid templateFileName. Must be one of: ${Object.keys(templateFileMap).join(", ")}`,
+			});
 		}
 
 		// Validate serverNamesArray (array of strings)
@@ -251,7 +264,7 @@ router.post("/create-config-file", async (req: Request, res: Response) => {
 		}
 
 		// Verify template file exists
-		const fileValidation = verifyTemplateFileExists(templateFileName);
+		const fileValidation = verifyTemplateFileExists(actualTemplateFileName);
 		if (!fileValidation.exists) {
 			return res.status(400).json({ error: fileValidation.error });
 		}
