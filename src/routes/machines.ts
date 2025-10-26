@@ -23,7 +23,7 @@ router.get("/", authenticateToken, async (req, res) => {
 	console.log("in GET /machines");
 
 	const existingMachines = await Machine.find();
-	console.log(existingMachines);
+	// console.log(existingMachines);
 
 	// Update each machine's properties if necessary
 	const updatedMachines = existingMachines.map((machine) => {
