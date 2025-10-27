@@ -220,4 +220,78 @@ router.get("/get-all-porkbun-subdomains/:domain", authenticateToken, async (req:
 	}
 });
 
+// 🔹 DELETE /registrar/porkbun-subdomain: Delete a DNS subdomain record from Porkbun
+router.delete("/porkbun-subdomain", authenticateToken, async (req: Request, res: Response) => {
+	try {
+		const { domain, type, subdomain } = req.body;
+
+		// Validate required fields
+		const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
+			"domain",
+			"type",
+			"subdomain",
+		]);
+
+		if (!isValid) {
+			return res.status(400).json({
+				errorFrom: "The404-API",
+				error: `Missing ${missingKeys.join(", ")}`,
+			});
+		}
+
+		// Validate environment variables
+		if (!process.env.PORKBUN_API_KEY || !process.env.PORKBUN_SECRET_KEY) {
+			return res.status(500).json({
+				errorFrom: "The404-API",
+				error: "Porkbun API credentials not configured",
+			});
+		}
+
+		// Make request to Porkbun API
+		const response = await fetch(
+			`https://api.porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/${type}/${subdomain}`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					apikey: process.env.PORKBUN_API_KEY,
+					secretapikey: process.env.PORKBUN_SECRET_KEY,
+				}),
+			}
+		);
+
+		const data = await response.json();
+
+		// Check if the request was successful
+		if (data.status === "ERROR") {
+			return res.status(500).json({
+				errorFrom: "porkbun",
+				error: data.message || "Unknown Porkbun error",
+			});
+		}
+
+		if (data.status !== "SUCCESS") {
+			return res.status(500).json({
+				errorFrom: "The404-API",
+				error: "Unexpected response from Porkbun API",
+			});
+		}
+
+		res.json({
+			message: "DNS record deleted successfully",
+			domain,
+			type,
+			subdomain,
+		});
+	} catch (error) {
+		console.error("Error deleting DNS record from Porkbun:", error);
+		res.status(500).json({
+			errorFrom: "The404-API",
+			error: "Internal server error",
+		});
+	}
+});
+
 export default router;

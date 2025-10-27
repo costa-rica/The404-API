@@ -1826,3 +1826,112 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-subdomains/tu-r
 	"error": "Internal server error"
 }
 ```
+
+---
+
+### DELETE /registrar/porkbun-subdomain
+
+Delete a specific DNS subdomain record from Porkbun by domain, type, and subdomain name.
+
+**Authentication:** Required (JWT token)
+
+**Request Body:**
+
+```json
+{
+	"domain": "tu-rincon.com",
+	"type": "A",
+	"subdomain": "api"
+}
+```
+
+**Field Descriptions:**
+
+- `domain` (string, required) - The root domain (e.g., "tu-rincon.com")
+- `type` (string, required) - The DNS record type (e.g., "A", "CNAME", "TXT", etc.)
+- `subdomain` (string, required) - The subdomain name (e.g., "api" for "api.tu-rincon.com")
+
+**Request Example:**
+
+```bash
+curl --location --request DELETE 'http://localhost:3000/registrar/porkbun-subdomain' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+--data-raw '{
+  "domain": "tu-rincon.com",
+  "type": "A",
+  "subdomain": "api"
+}'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"message": "DNS record deleted successfully",
+	"domain": "tu-rincon.com",
+	"type": "A",
+	"subdomain": "api"
+}
+```
+
+**Notes:**
+
+- Makes an authenticated request to Porkbun API using `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables
+- Porkbun API endpoint: `https://api.porkbun.com/api/json/v3/dns/deleteByNameType/{domain}/{type}/{subdomain}`
+- Deletes the DNS record matching the exact domain, type, and subdomain combination
+
+**Error Responses:**
+
+**400 Bad Request - Missing Fields:**
+
+```json
+{
+	"errorFrom": "The404-API",
+	"error": "Missing domain, type, subdomain"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**500 Internal Server Error - Missing Credentials:**
+
+```json
+{
+	"errorFrom": "The404-API",
+	"error": "Porkbun API credentials not configured"
+}
+```
+
+**500 Internal Server Error - Porkbun Error:**
+
+```json
+{
+	"errorFrom": "porkbun",
+	"error": "Record not found or already deleted"
+}
+```
+
+**500 Internal Server Error - Unexpected Response:**
+
+```json
+{
+	"errorFrom": "The404-API",
+	"error": "Unexpected response from Porkbun API"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"errorFrom": "The404-API",
+	"error": "Internal server error"
+}
+```
