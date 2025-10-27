@@ -26,6 +26,7 @@ Authorization: Bearer <your_jwt_token>
 - [PM2 Routes](#pm2-routes)
 - [Nginx Routes](#nginx-routes)
 - [Admin Routes](#admin-routes)
+- [Registrar Routes](#registrar-routes)
 
 ---
 
@@ -1495,5 +1496,214 @@ The file is streamed as a download with appropriate headers:
 ```json
 {
 	"error": "Failed to download file"
+}
+```
+
+---
+
+## Registrar Routes
+
+### GET /registrar/get-all-porkbun-domains
+
+Fetch all domains from Porkbun registrar account and return simplified domain information.
+
+**Authentication:** Required (JWT token)
+
+**Request:**
+
+```http
+GET /registrar/get-all-porkbun-domains HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/registrar/get-all-porkbun-domains' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"domainsArray": [
+		{
+			"domain": "dashanddata.com",
+			"status": "ACTIVE"
+		},
+		{
+			"domain": "tu-rincon.com",
+			"status": "ACTIVE"
+		}
+	]
+}
+```
+
+**Notes:**
+
+- Makes an authenticated request to Porkbun API using `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables
+- Returns only domain name and status from the full Porkbun response
+- Porkbun API endpoint: `https://api.porkbun.com/api/json/v3/domain/listAll`
+
+**Error Responses:**
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**500 Internal Server Error - Missing Credentials:**
+
+```json
+{
+	"error": "Porkbun API credentials not configured"
+}
+```
+
+**500 Internal Server Error - Porkbun API Failed:**
+
+```json
+{
+	"error": "Failed to fetch domains from Porkbun"
+}
+```
+
+**500 Internal Server Error - Non-Success Status:**
+
+```json
+{
+	"error": "Porkbun API returned non-success status",
+	"details": {
+		"status": "ERROR",
+		"message": "Invalid API credentials"
+	}
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Internal server error"
+}
+```
+
+---
+
+### POST /registrar/create-subdomain
+
+Create a new DNS subdomain record on Porkbun for a specific domain.
+
+**Authentication:** Required (JWT token)
+
+**Request Body:**
+
+```json
+{
+	"domain": "tu-rincon.com",
+	"subdomain": "api",
+	"publicIpAddress": "192.168.1.100",
+	"type": "A"
+}
+```
+
+**Field Descriptions:**
+
+- `domain` (string, required) - The root domain (e.g., "tu-rincon.com")
+- `subdomain` (string, required) - The subdomain name (e.g., "api" for "api.tu-rincon.com")
+- `publicIpAddress` (string, required) - The IP address or target for the DNS record
+- `type` (string, required) - The DNS record type (e.g., "A", "CNAME", "TXT", etc.)
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/registrar/create-subdomain' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+--data-raw '{
+  "domain": "tu-rincon.com",
+  "subdomain": "api",
+  "publicIpAddress": "192.168.1.100",
+  "type": "A"
+}'
+```
+
+**Success Response (201 Created):**
+
+```json
+{
+	"message": "Subdomain created successfully",
+	"recordId": "12345678",
+	"domain": "tu-rincon.com",
+	"subdomain": "api",
+	"type": "A",
+	"publicIpAddress": "192.168.1.100",
+	"ttl": 600
+}
+```
+
+**Notes:**
+
+- Makes an authenticated request to Porkbun API using `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables
+- TTL is automatically set to 600 seconds (10 minutes)
+- Porkbun API endpoint: `https://api.porkbun.com/api/json/v3/dns/create/{domain}`
+- Common DNS record types: "A" (IPv4), "AAAA" (IPv6), "CNAME" (alias), "TXT" (text), "MX" (mail)
+
+**Error Responses:**
+
+**400 Bad Request - Missing Fields:**
+
+```json
+{
+	"error": "Missing domain, subdomain, publicIpAddress, type"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**500 Internal Server Error - Missing Credentials:**
+
+```json
+{
+	"error": "Porkbun API credentials not configured"
+}
+```
+
+**500 Internal Server Error - Porkbun API Failed:**
+
+```json
+{
+	"error": "Failed to create subdomain on Porkbun"
+}
+```
+
+**500 Internal Server Error - Non-Success Status:**
+
+```json
+{
+	"error": "Porkbun API returned non-success status",
+	"details": {
+		"status": "ERROR",
+		"message": "Invalid domain or DNS record"
+	}
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Internal server error"
 }
 ```

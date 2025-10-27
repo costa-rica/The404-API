@@ -22,6 +22,7 @@ import machinesRouter from "./routes/machines";
 import pm2Router from "./routes/pm2";
 import nginxRouter from "./routes/nginx";
 import adminRouter from "./routes/admin";
+import registrarRouter from "./routes/registrar";
 
 // Verify and create necessary directories first
 verifyCheckDirectoryExists();
@@ -45,6 +46,7 @@ app.use("/machines", machinesRouter);
 app.use("/pm2", pm2Router);
 app.use("/nginx", nginxRouter);
 app.use("/admin", adminRouter);
+app.use("/registrar", registrarRouter);
 app.use("/", indexRouter);
 
 // Initialize database and startup functions
