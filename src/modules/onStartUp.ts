@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import bcrypt from "bcrypt";
 import { User } from "../models/user";
 
@@ -15,6 +16,18 @@ export function verifyCheckDirectoryExists(): void {
 			console.log(`Created directory: ${dirPath}`);
 		}
 	});
+
+	// Create status_reports subdirectory in PATH_PROJECT_RESOURCES
+	if (process.env.PATH_PROJECT_RESOURCES) {
+		const statusReportsDir = path.join(
+			process.env.PATH_PROJECT_RESOURCES,
+			"status_reports"
+		);
+		if (!fs.existsSync(statusReportsDir)) {
+			fs.mkdirSync(statusReportsDir, { recursive: true });
+			console.log(`Created directory: ${statusReportsDir}`);
+		}
+	}
 }
 
 export async function onStartUpCreateEnvUsers(): Promise<void> {

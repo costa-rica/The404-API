@@ -928,6 +928,7 @@ curl --location 'http://localhost:3000/nginx/scan-nginx-dir' \
 	"errors": 1,
 	"currentMachineIp": "192.168.1.50",
 	"nginxHostMachineId": "507f1f77bcf86cd799439013",
+	"reportPath": "/path/to/resources/status_reports/nginxConfigFileScanStatusSummary_2025-10-26T22-45-30-123Z.csv",
 	"newEntries": [
 		{
 			"fileName": "api.example.com",
@@ -966,7 +967,8 @@ curl --location 'http://localhost:3000/nginx/scan-nginx-dir' \
 - Automatically filters out the 'default' config file
 - Parses each config file to extract server names, port, IP address, and framework
 - Creates database entries only for new configurations (skips duplicates)
-- Returns detailed information about new entries, duplicates, and errors
+- Generates a CSV report saved to `PATH_PROJECT_RESOURCES/status_reports/` with details for each scanned file
+- Returns detailed information about new entries, duplicates, and errors including the path to the generated CSV report
 
 **Error Responses:**
 

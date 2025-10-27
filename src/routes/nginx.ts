@@ -8,6 +8,7 @@ import { verifyTemplateFileExists } from "../modules/fileValidation";
 import { parseNginxConfig } from "../modules/parseNginxConfig";
 import { getMachineInfo } from "../modules/machines";
 import { createNginxConfigFromTemplate } from "../modules/nginx";
+import { generateNginxScanReport } from "../modules/nginxReports";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
@@ -142,7 +143,14 @@ router.get("/scan-nginx-dir", async (req: Request, res: Response) => {
 			}
 		}
 
-		// 6. Return response
+		// 6. Generate CSV report
+		const reportPath = generateNginxScanReport(
+			newEntries,
+			duplicates,
+			errors
+		);
+
+		// 7. Return response
 		res.json({
 			scanned: configFiles.length,
 			new: newEntries.length,
@@ -150,6 +158,7 @@ router.get("/scan-nginx-dir", async (req: Request, res: Response) => {
 			errors: errors.length,
 			currentMachineIp,
 			nginxHostMachineId: nginxHostMachine._id,
+			reportPath,
 			newEntries,
 			duplicateEntries: duplicates,
 			errorEntries: errors,
