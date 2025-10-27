@@ -11,6 +11,7 @@ router.get("/get-all-porkbun-domains", authenticateToken, async (req: Request, r
 		// Validate environment variables
 		if (!process.env.PORKBUN_API_KEY || !process.env.PORKBUN_SECRET_KEY) {
 			return res.status(500).json({
+				errorFrom: "The404-API",
 				error: "Porkbun API credentials not configured",
 			});
 		}
@@ -30,19 +31,20 @@ router.get("/get-all-porkbun-domains", authenticateToken, async (req: Request, r
 			}
 		);
 
-		if (!response.ok) {
-			return res.status(response.status).json({
-				error: "Failed to fetch domains from Porkbun",
-			});
-		}
-
 		const data = await response.json();
 
 		// Check if the request was successful
+		if (data.status === "ERROR") {
+			return res.status(500).json({
+				errorFrom: "porkbun",
+				error: data.message || "Unknown Porkbun error",
+			});
+		}
+
 		if (data.status !== "SUCCESS") {
 			return res.status(500).json({
-				error: "Porkbun API returned non-success status",
-				details: data,
+				errorFrom: "The404-API",
+				error: "Unexpected response from Porkbun API",
 			});
 		}
 
@@ -58,6 +60,7 @@ router.get("/get-all-porkbun-domains", authenticateToken, async (req: Request, r
 	} catch (error) {
 		console.error("Error fetching Porkbun domains:", error);
 		res.status(500).json({
+			errorFrom: "The404-API",
 			error: "Internal server error",
 		});
 	}
@@ -77,12 +80,16 @@ router.post("/create-subdomain", authenticateToken, async (req: Request, res: Re
 		]);
 
 		if (!isValid) {
-			return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
+			return res.status(400).json({
+				errorFrom: "The404-API",
+				error: `Missing ${missingKeys.join(", ")}`,
+			});
 		}
 
 		// Validate environment variables
 		if (!process.env.PORKBUN_API_KEY || !process.env.PORKBUN_SECRET_KEY) {
 			return res.status(500).json({
+				errorFrom: "The404-API",
 				error: "Porkbun API credentials not configured",
 			});
 		}
@@ -106,19 +113,20 @@ router.post("/create-subdomain", authenticateToken, async (req: Request, res: Re
 			}
 		);
 
-		if (!response.ok) {
-			return res.status(response.status).json({
-				error: "Failed to create subdomain on Porkbun",
-			});
-		}
-
 		const data = await response.json();
 
 		// Check if the request was successful
+		if (data.status === "ERROR") {
+			return res.status(500).json({
+				errorFrom: "porkbun",
+				error: data.message || "Unknown Porkbun error",
+			});
+		}
+
 		if (data.status !== "SUCCESS") {
 			return res.status(500).json({
-				error: "Porkbun API returned non-success status",
-				details: data,
+				errorFrom: "The404-API",
+				error: "Unexpected response from Porkbun API",
 			});
 		}
 
@@ -134,6 +142,7 @@ router.post("/create-subdomain", authenticateToken, async (req: Request, res: Re
 	} catch (error) {
 		console.error("Error creating subdomain on Porkbun:", error);
 		res.status(500).json({
+			errorFrom: "The404-API",
 			error: "Internal server error",
 		});
 	}
@@ -146,12 +155,16 @@ router.get("/get-all-porkbun-subdomains/:domain", authenticateToken, async (req:
 
 		// Validate domain parameter
 		if (!domain) {
-			return res.status(400).json({ error: "Domain parameter is required" });
+			return res.status(400).json({
+				errorFrom: "The404-API",
+				error: "Domain parameter is required",
+			});
 		}
 
 		// Validate environment variables
 		if (!process.env.PORKBUN_API_KEY || !process.env.PORKBUN_SECRET_KEY) {
 			return res.status(500).json({
+				errorFrom: "The404-API",
 				error: "Porkbun API credentials not configured",
 			});
 		}
@@ -171,19 +184,20 @@ router.get("/get-all-porkbun-subdomains/:domain", authenticateToken, async (req:
 			}
 		);
 
-		if (!response.ok) {
-			return res.status(response.status).json({
-				error: "Failed to fetch DNS records from Porkbun",
-			});
-		}
-
 		const data = await response.json();
 
 		// Check if the request was successful
+		if (data.status === "ERROR") {
+			return res.status(500).json({
+				errorFrom: "porkbun",
+				error: data.message || "Unknown Porkbun error",
+			});
+		}
+
 		if (data.status !== "SUCCESS") {
 			return res.status(500).json({
-				error: "Porkbun API returned non-success status",
-				details: data,
+				errorFrom: "The404-API",
+				error: "Unexpected response from Porkbun API",
 			});
 		}
 
@@ -200,6 +214,7 @@ router.get("/get-all-porkbun-subdomains/:domain", authenticateToken, async (req:
 	} catch (error) {
 		console.error("Error fetching DNS records from Porkbun:", error);
 		res.status(500).json({
+			errorFrom: "The404-API",
 			error: "Internal server error",
 		});
 	}

@@ -1561,27 +1561,26 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-domains' \
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Porkbun API credentials not configured"
 }
 ```
 
-**500 Internal Server Error - Porkbun API Failed:**
+**500 Internal Server Error - Porkbun Error:**
 
 ```json
 {
-	"error": "Failed to fetch domains from Porkbun"
+	"errorFrom": "porkbun",
+	"error": "Invalid API credentials"
 }
 ```
 
-**500 Internal Server Error - Non-Success Status:**
+**500 Internal Server Error - Unexpected Response:**
 
 ```json
 {
-	"error": "Porkbun API returned non-success status",
-	"details": {
-		"status": "ERROR",
-		"message": "Invalid API credentials"
-	}
+	"errorFrom": "The404-API",
+	"error": "Unexpected response from Porkbun API"
 }
 ```
 
@@ -1589,6 +1588,7 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-domains' \
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Internal server error"
 }
 ```
@@ -1660,6 +1660,7 @@ curl --location 'http://localhost:3000/registrar/create-subdomain' \
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Missing domain, subdomain, publicIpAddress, type"
 }
 ```
@@ -1676,27 +1677,26 @@ curl --location 'http://localhost:3000/registrar/create-subdomain' \
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Porkbun API credentials not configured"
 }
 ```
 
-**500 Internal Server Error - Porkbun API Failed:**
+**500 Internal Server Error - Porkbun Error:**
 
 ```json
 {
-	"error": "Failed to create subdomain on Porkbun"
+	"errorFrom": "porkbun",
+	"error": "Invalid domain or DNS record"
 }
 ```
 
-**500 Internal Server Error - Non-Success Status:**
+**500 Internal Server Error - Unexpected Response:**
 
 ```json
 {
-	"error": "Porkbun API returned non-success status",
-	"details": {
-		"status": "ERROR",
-		"message": "Invalid domain or DNS record"
-	}
+	"errorFrom": "The404-API",
+	"error": "Unexpected response from Porkbun API"
 }
 ```
 
@@ -1704,6 +1704,7 @@ curl --location 'http://localhost:3000/registrar/create-subdomain' \
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Internal server error"
 }
 ```
@@ -1777,6 +1778,7 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-subdomains/tu-r
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Domain parameter is required"
 }
 ```
@@ -1793,27 +1795,26 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-subdomains/tu-r
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Porkbun API credentials not configured"
 }
 ```
 
-**500 Internal Server Error - Porkbun API Failed:**
+**500 Internal Server Error - Porkbun Error:**
 
 ```json
 {
-	"error": "Failed to fetch DNS records from Porkbun"
+	"errorFrom": "porkbun",
+	"error": "Domain is not opted in to API access."
 }
 ```
 
-**500 Internal Server Error - Non-Success Status:**
+**500 Internal Server Error - Unexpected Response:**
 
 ```json
 {
-	"error": "Porkbun API returned non-success status",
-	"details": {
-		"status": "ERROR",
-		"message": "Invalid domain"
-	}
+	"errorFrom": "The404-API",
+	"error": "Unexpected response from Porkbun API"
 }
 ```
 
@@ -1821,6 +1822,7 @@ curl --location 'http://localhost:3000/registrar/get-all-porkbun-subdomains/tu-r
 
 ```json
 {
+	"errorFrom": "The404-API",
 	"error": "Internal server error"
 }
 ```
