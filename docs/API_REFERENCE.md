@@ -1707,3 +1707,120 @@ curl --location 'http://localhost:3000/registrar/create-subdomain' \
 	"error": "Internal server error"
 }
 ```
+
+---
+
+### GET /registrar/get-all-porkbun-subdomains/:domain
+
+Retrieve all DNS records (subdomains) for a specific domain from Porkbun.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+- `domain` (string, required) - The domain name to retrieve DNS records for (e.g., "tu-rincon.com")
+
+**Request:**
+
+```http
+GET /registrar/get-all-porkbun-subdomains/tu-rincon.com HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/registrar/get-all-porkbun-subdomains/tu-rincon.com' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"subdomainsArray": [
+		{
+			"name": "api.tu-rincon.com",
+			"type": "A",
+			"content": "69.207.163.8"
+		},
+		{
+			"name": "test.dev.api.tu-rincon.com",
+			"type": "A",
+			"content": "69.207.163.8"
+		},
+		{
+			"name": "tu-rincon.com",
+			"type": "A",
+			"content": "69.207.163.8"
+		},
+		{
+			"name": "tu-rincon.com",
+			"type": "NS",
+			"content": "curitiba.porkbun.com"
+		}
+	]
+}
+```
+
+**Notes:**
+
+- Makes an authenticated request to Porkbun API using `PORKBUN_API_KEY` and `PORKBUN_SECRET_KEY` environment variables
+- Returns only `name`, `type`, and `content` fields from each DNS record
+- Porkbun API endpoint: `https://api.porkbun.com/api/json/v3/dns/retrieve/{domain}`
+- Includes all DNS record types: A, AAAA, CNAME, MX, TXT, NS, etc.
+
+**Error Responses:**
+
+**400 Bad Request - Missing Domain:**
+
+```json
+{
+	"error": "Domain parameter is required"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**500 Internal Server Error - Missing Credentials:**
+
+```json
+{
+	"error": "Porkbun API credentials not configured"
+}
+```
+
+**500 Internal Server Error - Porkbun API Failed:**
+
+```json
+{
+	"error": "Failed to fetch DNS records from Porkbun"
+}
+```
+
+**500 Internal Server Error - Non-Success Status:**
+
+```json
+{
+	"error": "Porkbun API returned non-success status",
+	"details": {
+		"status": "ERROR",
+		"message": "Invalid domain"
+	}
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Internal server error"
+}
+```

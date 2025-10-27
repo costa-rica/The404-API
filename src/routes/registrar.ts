@@ -139,4 +139,70 @@ router.post("/create-subdomain", authenticateToken, async (req: Request, res: Re
 	}
 });
 
+// 🔹 GET /registrar/get-all-porkbun-subdomains/:domain: Retrieve all DNS records for a domain from Porkbun
+router.get("/get-all-porkbun-subdomains/:domain", authenticateToken, async (req: Request, res: Response) => {
+	try {
+		const { domain } = req.params;
+
+		// Validate domain parameter
+		if (!domain) {
+			return res.status(400).json({ error: "Domain parameter is required" });
+		}
+
+		// Validate environment variables
+		if (!process.env.PORKBUN_API_KEY || !process.env.PORKBUN_SECRET_KEY) {
+			return res.status(500).json({
+				error: "Porkbun API credentials not configured",
+			});
+		}
+
+		// Make request to Porkbun API
+		const response = await fetch(
+			`https://api.porkbun.com/api/json/v3/dns/retrieve/${domain}`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					apikey: process.env.PORKBUN_API_KEY,
+					secretapikey: process.env.PORKBUN_SECRET_KEY,
+				}),
+			}
+		);
+
+		if (!response.ok) {
+			return res.status(response.status).json({
+				error: "Failed to fetch DNS records from Porkbun",
+			});
+		}
+
+		const data = await response.json();
+
+		// Check if the request was successful
+		if (data.status !== "SUCCESS") {
+			return res.status(500).json({
+				error: "Porkbun API returned non-success status",
+				details: data,
+			});
+		}
+
+		// Transform the response to only include name, type, and content
+		const subdomainsArray = data.records.map(
+			(record: { name: string; type: string; content: string }) => ({
+				name: record.name,
+				type: record.type,
+				content: record.content,
+			})
+		);
+
+		res.json({ subdomainsArray });
+	} catch (error) {
+		console.error("Error fetching DNS records from Porkbun:", error);
+		res.status(500).json({
+			error: "Internal server error",
+		});
+	}
+});
+
 export default router;
