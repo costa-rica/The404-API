@@ -25,6 +25,7 @@ Authorization: Bearer <your_jwt_token>
 - [Machine Routes](#machine-routes)
 - [PM2 Routes](#pm2-routes)
 - [Nginx Routes](#nginx-routes)
+- [Admin Routes](#admin-routes)
 
 ---
 
@@ -1329,5 +1330,170 @@ curl --location --request DELETE 'http://localhost:3000/nginx/clear' \
 ```json
 {
 	"error": "Failed to clear nginx files"
+}
+```
+
+## Admin Routes
+
+### GET /admin/downloads
+
+List all files available for download in the status_reports directory.
+
+**Authentication:** Required (JWT token)
+
+**Request:**
+
+```http
+GET /admin/downloads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/admin/downloads' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+	"directory": "/path/to/resources/status_reports",
+	"fileCount": 3,
+	"files": [
+		{
+			"fileName": "nginxConfigFileScanStatusSummary_2025-10-26T22-45-30-123Z.csv",
+			"size": 15234,
+			"sizeKB": "14.88",
+			"modifiedDate": "2025-10-26T22:45:30.123Z",
+			"isFile": true
+		},
+		{
+			"fileName": "nginxConfigFileScanStatusSummary_2025-10-26T23-12-45-456Z.csv",
+			"size": 18567,
+			"sizeKB": "18.13",
+			"modifiedDate": "2025-10-26T23:12:45.456Z",
+			"isFile": true
+		}
+	]
+}
+```
+
+**Notes:**
+
+- Returns all files from the `PATH_PROJECT_RESOURCES/status_reports/` directory
+- Includes file metadata: name, size in bytes, size in KB, and modification date
+- Only returns actual files (filters out directories)
+
+**Error Responses:**
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**404 Not Found - Directory Not Found:**
+
+```json
+{
+	"error": "Status reports directory not found",
+	"path": "/path/to/resources/status_reports"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Failed to list download files"
+}
+```
+
+---
+
+### GET /admin/downloads/:filename
+
+Download a specific file from the status_reports directory.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+- `filename` (string, required) - Name of the file to download
+
+**Request:**
+
+```http
+GET /admin/downloads/nginxConfigFileScanStatusSummary_2025-10-26T22-45-30-123Z.csv HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <your_jwt_token>
+```
+
+**Request Example:**
+
+```bash
+curl --location 'http://localhost:3000/admin/downloads/nginxConfigFileScanStatusSummary_2025-10-26T22-45-30-123Z.csv' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+--output report.csv
+```
+
+**Success Response (200 OK):**
+
+The file is streamed as a download with appropriate headers:
+- `Content-Disposition: attachment; filename="<filename>"`
+- `Content-Type: application/octet-stream`
+- `Content-Length: <file-size>`
+
+**Notes:**
+
+- Downloads files from the `PATH_PROJECT_RESOURCES/status_reports/` directory
+- Filename is validated to prevent directory traversal attacks
+- File is streamed directly to the client
+- Suitable for downloading CSV reports and other status files
+
+**Error Responses:**
+
+**400 Bad Request - Invalid Filename:**
+
+```json
+{
+	"error": "Invalid filename"
+}
+```
+
+**400 Bad Request - Not a File:**
+
+```json
+{
+	"error": "Not a file"
+}
+```
+
+**401 Unauthorized - Missing or Invalid Token:**
+
+```json
+{
+	"error": "Access denied. No token provided."
+}
+```
+
+**404 Not Found - File Not Found:**
+
+```json
+{
+	"error": "File not found"
+}
+```
+
+**500 Internal Server Error:**
+
+```json
+{
+	"error": "Failed to download file"
 }
 ```
